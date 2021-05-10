@@ -1,300 +1,420 @@
-from typing import List 
-from libqtile import bar, layout, widget, extension
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
-from libqtile.lazy import lazy
-from libqtile.utils import guess_terminal
-from random import shuffle 
+from libqtile.config import Key, Screen, Group, Drag, Click, Match
+from libqtile.command import lazy
+from libqtile import layout, bar, widget, hook
+from os import listdir
+from os import path
+import subprocess
+import json
 
-import os
-#Tecla principal usada para los comandos(mod1=Alt-izq, mod4=Super-izq)
+qtile_path = path.join(path.expanduser("~"), ".config", "qtile")
+
+
+# THEME
+
+theme = "material-darker" # only if available in ~/.config/qtile/themes
+
+theme_path = path.join(qtile_path, "themes", theme)
+
+# map color name to hex values
+with open(path.join(theme_path, "colors.json")) as f:
+    colors = json.load(f)
+colorgb = colors['orange']
+img = {}
+
+# map image name to its path
+img_path = path.join(theme_path, "img")
+for i in listdir(img_path):
+    img[i.split(".")[0]] = path.join(img_path, i)
+
+
+# AUTOSTART
+
+@hook.subscribe.startup_once
+def autostart():
+    script = path.join(qtile_path, "autostart.sh")
+    subprocess.call([script])
+
+
+# KEYS
+
 mod = "mod1"
 
-keys = [
-    #Hotkey de la app Dmenu
-    Key([mod], "q", lazy.spawn("rofi -show drun")),
+#          Special  KeyCap  Actions
+keys = [Key(key[0], key[1], *key[2:]) for key in [
+    # ------------ Window Configs ------------
 
-    # Cambio del foco entre ventanas
-    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
-    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
-    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
-    Key([mod], "space", lazy.layout.next(),
-        desc="Move window focus to other window"),
-    # Teclas personalizadas.
-    Key([mod], "c", lazy.spawn("google-chrome-stable")),
-    Key([mod], "s", lazy.spawn("subl")),
-    Key([mod], "d", lazy.spawn("texmaker")),
-    Key([mod], "a", lazy.spawn("android-studio")),
-    Key([mod], "v", lazy.spawn("vscodium")),
-    Key([mod], "o", lazy.spawn("ms-office-online")),
-    Key([mod], "g", lazy.spawn("gimp")),
-    Key([mod], "t", lazy.spawn("teams")),
-    
-    # Mover las ventanas de posicion.
-    # Mover fuera del layout de las columnas creara una nueva columna
-    Key([mod, "shift"], "h", lazy.layout.shuffle_left(),
-        desc="Move window to the left"),
-    Key([mod, "shift"], "l", lazy.layout.shuffle_right(),
-        desc="Move window to the right"),
-    Key([mod, "shift"], "j", lazy.layout.shuffle_down(),
-        desc="Move window down"),
-    Key([mod, "shift"], "k", lazy.layout.shuffle_up(), desc="Move window up"),
+    #Screenshots
+    ([], "Print", lazy.spawn("escrotum -C")),
+    ([mod], "Print", lazy.spawn("escrotum ~/Pictures/Screenshots/screenshot_%d_%m_%Y_%H_%M_%S.png")),
+    ([mod, "shift"], "s", lazy.spawn("escrotum -s ")),
 
-    # Agrandar las ventanas desde el borde a cualquier direccion
-    # will be to screen edge - window would shrink.
-    Key([mod, "control"], "h", lazy.layout.grow_left(),
-        desc="Grow window to the left"),
-    Key([mod, "control"], "l", lazy.layout.grow_right(),
-        desc="Grow window to the right"),
-    Key([mod, "control"], "j", lazy.layout.grow_down(),
-        desc="Grow window down"),
-    Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
-    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    # Switch between windows in current stack pane
+    ([mod], "j", lazy.layout.down()),
+    ([mod], "k", lazy.layout.up()),
+    ([mod], "h", lazy.layout.left()),
+    ([mod], "l", lazy.layout.right()),
 
-    # Toggle between split and unsplit sides of stack.
-    # Split = all windows displayed
-    # Unsplit = 1 window displayed, like Max layout, but still with
-    # multiple stack panes
-    Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
-        desc="Toggle between split and unsplit sides of stack"),
-    Key([mod], "i", lazy.spawn("kitty"), desc="Launch terminal"),
+    # Change window sizes
+    ([mod, "control"], "h", lazy.layout.grow_left()),
+    ([mod, "control"], "l", lazy.layout.grow_right()),
+    ([mod, "control"], "j", lazy.layout.grow_down()),
+    ([mod, "control"], "k", lazy.layout.grow_up()),
+    ([mod], "n", lazy.layout.normalize()),
 
-    # Cambia entre los layouts habilitados 
-    Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
-    Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
+    # Move windows up or down in current stack
+    ([mod, "shift"], "j", lazy.layout.shuffle_down()),
+    ([mod, "shift"], "k", lazy.layout.shuffle_up()),
+    ([mod, "shift"], "h", lazy.layout.shuffle_left()),
+    ([mod, "shift"], "l", lazy.layout.shuffle_right()),
+    ([mod], "space", lazy.layout.next()),
 
-    Key([mod, "control"], "r", lazy.restart(), desc="Restart Qtile"),
-    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawncmd(),
-        desc="Spawn a command using a prompt widget"),
-    # Screenshot
-    # Guardar screenshot al clipboard
-    Key([], "Print", lazy.spawn("escrotum -C")),
-    # Guardar screenshots a la carpeta
-    Key([mod], "Print", lazy.spawn("escrotum ~/Pictures/Screenshots/screenshot_%d_%m_%Y_%H_%M_%S.png")),
-	# Capturar una region de la pantalla al clipboard
-    Key([mod, "shift"], "s", lazy.spawn("escrotum -Cs ")),
-]
-# Espacios de trabajo 
-#groups = [Group(i) for i in ""]
-__groups = {
-    # Los matches sirven para agregar reglas a los espacios de trabajo.
-    1:Group("", matches=[Match(wm_class=["google-chrome"])]),
-    2:Group("",matches=[Match(wm_class=["tilix"])]),
-    3:Group("",matches=[Match(wm_class=["sublime_text"])]),
-    4:Group("",matches=[Match(wm_class=["vscodium","microsoft teams - preview"])]),
-    5:Group("",matches=[Match(wm_class=["sun-awt-X11-XWindowPeer","sun-awt-X11-XFramePeer"])]),
-    6:Group("",matches=[Match(wm_class=["ms-office-online"])]),
-}
-# Bucle donde se habilita los espacios de trabajo.
-groups = [__groups[i] for i in __groups]
+    # Toggle between different layouts as defined below
+    ([mod], "Tab", lazy.next_layout()),
 
-def get_group_key(name):
-    # Se agrega un contador para poder usarlas en las hotkeys y poder usar los numeros al cambiar
-    # entre espacios de trabajo
-    return [k for k, g in __groups.items() if g.name ==name][0]
-for i in groups:
+    # Qtile
+    ([mod, "control"], "r", lazy.restart()),
+    ([mod, "control"], "q", lazy.shutdown()),
+
+
+    # Swap panes of split stack
+    ([mod, "shift"], "space", lazy.layout.rotate()),
+    ([mod, "shift"], "Return", lazy.layout.toggle_split()),
+
+    # ------------ Apps Configs ------------
+
+    ([mod], "w", lazy.window.kill()),
+    ([mod], "q", lazy.spawn("rofi -show drun")),
+    ([mod], "o", lazy.spawn("ms-office-online")),
+    ([mod], "t", lazy.spawn("teams")),
+    ([mod], "e", lazy.spawn("goneovim")),
+    ([mod], "i", lazy.spawn("kitty")),
+    ([mod], "r", lazy.spawncmd("picom --experimental-backends &")),
+
+    # ------------ Hardware Configs ------------
+
+    # Volume
+    ([], "XF86AudioLowerVolume", lazy.spawn(
+        "pactl set-sink-volume @DEFAULT_SINK@ -5%"
+    )),
+    ([], "XF86AudioRaiseVolume", lazy.spawn(
+        "pactl set-sink-volume @DEFAULT_SINK@ +5%"
+    )),
+    ([], "XF86AudioMute", lazy.spawn(
+        "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+    )),
+    #Brightness
+    ([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +10%")),
+    ([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 10%-")),
+]]
+
+
+# GROUPS
+
+groups = [Group(i) for i in [("TERM"), "DEV", "NET", "CHAT", "MEDIA"]]
+
+for i, group in enumerate(groups):
+    # Each workspace is identified by a number starting at 1
+    actual_key = str(i + 1)
     keys.extend([
-        # mod = tecla definida anteriormente mas el numero cambiar el espacio de trabajo
-        Key([mod], str(get_group_key(i.name)), lazy.group[i.name].toscreen(),
-            desc="Switch to group {}".format(i.name)),
-
-        # mod + shift + el numero del espacio de trabajo cambia la ventana donde se esta trabando a la elejida
-        Key([mod, "shift"], str(get_group_key(i.name)), lazy.window.togroup(i.name, switch_group=True),
-            desc="Switch to & move focused window to group {}".format(i.name)),
-        # Si prefieres mover la ventana donde no se esta trabajando a otro espacio de trabajo active lo siguiente
-        # # mod1 + shift + letter of group = move focused window to group
-        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-        #     desc="move focused window to group {}".format(i.name)),
+        # Switch to workspace N (actual_key)
+        Key([mod], actual_key, lazy.group[group.name].toscreen()),
+        # Send window to workspace N (actual_key)
+        Key([mod, "shift"], actual_key, lazy.window.togroup(group.name))
     ])
-# Son formas en las que se organizan las ventanas estan predefinidas pero se pueden editar
+@hook.subscribe.startup_once
+def color():
+    if group.name==str("TERM") :
+        colorgb = colors['green']
+        return colorgb
+    if group.name==str("MEDIA") :
+        colorgb = colors['red']
+        return colorgb
+    if group.name==str("FS") :
+        colorgb = colors['yellow']
+        return colorgb
+
+
+# LAYOUTS
+
+layout_conf = {
+    'border_focus': colors['fg3'][0],
+    'border_width': 2,
+    'border_normal': colors['bg1'][0],
+    'margin': 3
+}
+
 layouts = [
-    #layout.Columns(),
-    layout.Max(),
-    # Try more layouts by unleashing below layouts.
+        layout.Max(),
+    layout.MonadTall(**layout_conf),
+    #layout.MonadWide(**layout_conf),
+    #layout.Matrix(columns=2, **layout_conf),
+    layout.Bsp(**layout_conf),
     layout.Stack(
+        **layout_conf,
         num_stacks=2,
         fair = True, 
-        border_width=2,
-        border_focus='#d65d0e',
-        margin=6,
         ),
-    layout.Bsp(border_width=2,
-        border_focus='#d65d0e',
-        fair=False,
-        grow_amount=3,
-        lower_right=True,
-        margin=6,
-        ),
-    #layout.Matrix(),
-    layout.MonadTall(
-        border_width=2,
-        border_focus='#d65d0e',
-        single_border_width=2,
-        margin=6,
-        change_size=20,
-        max_ratio=0.75,
-        min_ratio=0.40,
-        ratio=0.65),
-    #layout.MonadWide(
-        #border_focus='#85DEC0',
-        #single_border_width=3,
-        #margin=3,
-        #name= ' 鱗',
-        #change_size=20,
-        #max_ratio=0.75,
-        #min_ratio=0.40,
-        #ratio=0.6),
-    #layout.RatioTile(),
-    #layout.Tile(),
-    #layout.TreeTab(font='Gohufont Nerd Font Bold',
-    #    panel_width=90, sections=["臭"]),
-    #layout.VerticalTile(),
-    #layout.Zoomy(name="Z",
-    #    ),
-
+    # layout.Columns(),
+    # layout.RatioTile(),
+    # layout.Tile(),
+    # layout.TreeTab(),
+    # layout.VerticalTile(),
+    # layout.Zoomy(),
 ]
-#Lista de frases motivadoras:
-motiv = ["Da siempre lo mejor de ti, lo que plantes ahora lo cosecharas mas tarde.", 
-        "Celebra tus propias Victorias porque nadie mas entiende, lo que te costo alcanzarlas.", 
-        "El exito no se mide por lo que logras, sino por los obstaculos que superas.", 
-        "Un sueño no se hace realidad por arte de magia, necesita sudor, determinación y trabajo duro - Colin Powell",
-        "No busques los errores, busca un remedio - Henry Ford",
-        "Si te caíste ayer, levántate hoy - H. G. Wells",
-        "Siempre parece imposible... hasta que se hace - Nelson Mandela",
-        "No cuentes los días, haz que los días cuenten - Muhammad Ali",
-        "Los obstáculos son esas cosas atemorizantes que ves cuando apartas los ojos de tu meta - Henry Ford"]
 
-shuffle(motiv)
-frases = motiv[0]
 
-#Colores Gruvbox
-colors = [["#282828", "#282828"], # negro-background
-          ["#3d3f4b", "#434758"], # background for current screen tab
-          ["#000000", "#000000"], # fg 
-          ["#ea6962", "#ea6962"], # rojo 
-          ["#a9b665", "#a9b665"], # verde 
-          ["#e78a4e", "#e78a4e"], # amarillo 
-          ["#7daea3", "#7daea3"], # azul
-          ["#d3869b", "#d3869b"]] # morado 
-widget_defaults = dict(
-    font='Ubuntu Mono',
-    fontsize=13,
-    padding=2,
-)
-extension_defaults = widget_defaults.copy()
-# La barra inferior, se puede agregar a otra pantalla creando otra barra
-screens = [
-    Screen(
-        top=bar.Bar(
-            [
-                widget.GroupBox(
-                    block_highlight_text_color = colors[3] ,
-                    borderwidth = 0,
-                    disable_drag = True,
-                    active = colors[4],
-                    fontsize = 22,
-                    margin = 4.5,
-                    ),
-                widget.WindowName(
-                     foreground = colors[5] ,
-                     fontsize=13.5,
-                     empty_group_string=frases,
-                     format = '{empty}'),
-                     #para saber el wm_class
-                #     #format = '{class}'),
-                widget.Systray(),
-                widget.TextBox(
-                       text = '',
-                       foreground = "#cc241d",
-                       padding = 0,
-                       margin = 0,
-                       fontsize = 37
-                       ),
-                widget.Spacer(length=2,width=None,foreground = colors[2],background = "#cc241d"),
-                widget.CurrentLayout(
-                    foreground = colors[2],
-                    background = "#cc241d",
-                    padding= 5,
-                    font="FantasqueSansMono Nerd Font Mono Regular",
-                    fontsize=14.5,),
-                widget.Wallpaper(directory = '~/Pictures/Wallpapers', label='',
-                    fontsize = 22,foreground = colors[2],background = "#cc241d"),
-                widget.TextBox(
-                       text = '',
-                       background = "#cc241d",
-                       foreground = "#98971a",
-                       padding = 0,
-                       margin = 0,
-                       fontsize = 37
-                       ),
-                widget.Memory(
-                       foreground = colors[2],
-                       background = "#98971a",
-                       mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(tilix + ' -e htop')},
-                       padding = 5,
-                       fontsize = 13,
-                       font="FantasqueSansMono Nerd Font Mono Regular",
-                       ),
-                widget.TextBox(
-                       text = '',
-                       background = "#98971a",
-                       foreground = "#d79921",
-                       padding = 0,
-                       margin = 0,
-                       fontsize = 37
-                       ),
-                widget.Clock(
-                    format='%Y-%m-%d'' - ''%I:%M %p',
-                    font="FantasqueSansMono Nerd Font Mono Regular",
-                    fontsize=13.5,
-                    foreground = colors[2],
-                    background = "#d79921",
-                    margin = 1
-                    ),
-                widget.TextBox(
-                    text = '',
-                    background = "#d79921",
-                    foreground = "#458588",
-                    padding = 0,
-                    margin = 0,
-                    fontsize = 37
-                    ),
-                widget.Volume(emoji=True, foreground = colors[2], fontsize=14,background = "#458588"),
-                widget.Volume(              
-                    foreground = colors[2],  
-                    background = "#458588",  
-                    padding = 1,
-                    fontsize = 14,
-                    font="FantasqueSansMono Nerd Font Mono Regular",
-                    ),  
-                #widget.QuickExit(foreground="#CC00FF", default_text="   ", fontsize = 23),
-                widget.Spacer(length=10,width=None,foreground = colors[2],background = "#458588")
-            ],
-            20,
-            #opacity = 9
+# WIDGETS
+
+# Reusable configs for displaying different widgets on different screens
+
+def base(fg='bg0', bg='bg'):
+    return {
+        'foreground': colors[fg],
+        'background': colors[bg]
+    }
+
+
+separator = {
+    **base(),
+    'linewidth': 0,
+    'padding': 3,
+}
+
+group_box = {
+    'foreground': colors['fg3'],
+    'background': colors['fg3'],
+    'font': 'Ubuntu Bold',
+    'fontsize': 10,
+    'margin_y': 3,
+    'margin_x': 2,
+    'padding_y': 4,
+    'padding_x': 5,
+    'borderwidth': 1,
+    'block_highlight_text_color': colors['bg1'],
+    'active': colors['bg0'],
+    'inactive': colors['bg2'],
+    'rounded': True,
+    'highlight_method': 'block',
+    'this_current_screen_border':colorgb ,
+    'this_screen_border': colors['bg'],
+    'other_current_screen_border': colors['orange'],
+    'other_screen_border': colors['bg']
+}
+
+window_name = {
+    **base(fg='fg'),
+    'font': 'Ubuntu Bold',
+    'fontsize': 11,
+    'padding': 5
+}
+
+systray = {
+    'background': colors['bg'],
+    'padding': 5
+}
+
+text_box = {
+    'font': 'Ubuntu',
+    'fontsize': 13,
+    'padding': 3
+}
+
+current_layout_icon = {
+    'scale': 0.50,
+    'background': colors['red'],
+}
+
+current_layout = {
+    'padding': 5
+}
+
+clock = {
+    'format': '%H:%M '
+}
+
+volume_icon = {
+     'emoji':True,
+     'fontsize': 15,
+     'padding': 3
+} 
+pomodoro = {
+    'background': colors['fg3'],
+    'color_active': colors['bg'],
+    'color_inactive': colors['bg'],
+    'color_break' : colors['bg'],
+    'padding': 5,
+    'fontsize': 13,
+    'font': 'Ubuntu',
+    'prefix_inactive':'Work',
+    'prefix_break':'',
+    'prefix_pause':'',
+    'prefix_active':'',
+}
+
+def workspaces():
+    return [
+        widget.Sep(**separator),
+        widget.GroupBox(**group_box),
+        widget.Image(
+            filename=img['gb-dark']
         ),
+        widget.Image(
+            filename=img['testgb']
+        ),
+        widget.Sep(**separator),
+        widget.WindowName(**window_name,format='{class}@mrmango1')
+    ]
+
+
+def powerline_base():
+    return [
+        widget.CurrentLayoutIcon(
+            **current_layout_icon,
+        ),
+        widget.Image(
+            filename=img['middle-red']
+        ),
+        widget.CurrentLayout(
+            **base(bg='fg3'),
+            **current_layout
+        ),
+        widget.Image(
+            filename=img['s-green']
+        ),
+        widget.Image(
+            filename=img['bg-green']
+        ),
+        widget.TextBox(
+            **base(bg='green'),
+            **text_box,
+            text=''
+        ),
+        widget.Image(
+            filename=img['middle-green']
+        ),
+        widget.Pomodoro(
+            **pomodoro
+        ),
+        widget.Image(
+            filename=img['s-yellow']
+        ),
+        widget.Image(
+            filename=img['bg-yellow']
+        ),
+        widget.TextBox(
+            **base(bg='yellow'),
+            fontsize=21,
+            padding=7,
+            text='',
+        ),
+        widget.Image(
+            filename=img['fg-yellow']
+        ),
+        widget.Clock(
+            **base(bg='fg3'),
+            **clock,
+        ),
+        widget.Image(
+            filename=img['test1']
+        ),
+        widget.Image(
+            filename=img['bg-blue']
+        ),
+        widget.Volume(
+            **base(bg='blue'),
+            **volume_icon
+        ),
+        widget.Image(
+            filename=img['fg-blue']
+        ),
+        widget.Volume(
+            **base(bg='fg3'),
+            padding=5,
+        )
+    ]
+
+
+laptop_widgets = [
+    *workspaces(),
+
+    widget.Sep(
+        **separator
     ),
+    widget.Systray(
+        **systray
+    ),
+    widget.Sep(
+        **separator
+    ),
+    widget.Image(
+        filename=img['bg-red']
+    ),
+    widget.Image(
+        filename=img['fg-red']
+    ),
+    *powerline_base(),
+    widget.Sep(
+        **separator
+    ),
+ ]
+
+
+monitor_widgets = [
+    *workspaces(),
+    widget.Image(
+        filename=img['bg-to-secondary']
+    ),
+    *powerline_base()
 ]
 
-# Mover las ventanas y hacerlas flotantes.
+widget_defaults = {
+    'font': 'Ubuntu Mono',
+    'fontsize': 13,
+    'padding': 2
+}
+extension_defaults = widget_defaults.copy()
+
+
+# SCREENS
+
+screens = [
+    Screen(top=bar.Bar(laptop_widgets, 24, opacity=0.85))
+]
+
+# check connected monitors
+monitors_status = subprocess.run(
+    "xrandr | grep 'connected' | cut -d ' ' -f 2",
+    shell=True,
+    stdout=subprocess.PIPE
+).stdout.decode("UTF-8").split("\n")[:-1]
+
+if monitors_status.count("connected") == 2:
+    screens.append(
+        Screen(top=bar.Bar(monitor_widgets, 24, opacity=0.95))
+    )
+
+
+# MOUSE
+
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(),
-         start=lazy.window.get_position()),
+        start=lazy.window.get_position()),
     Drag([mod], "Button3", lazy.window.set_size_floating(),
-         start=lazy.window.get_size()),
+        start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front())
 ]
-   
+
+
+# OTHER STUFF
+
 dgroups_key_binder = None
 dgroups_app_rules = []  # type: List
-main = None  # WARNING: this is deprecated and will be removed soon
+main = None
 follow_mouse_focus = True
 bring_front_click = False
 cursor_warp = False
-floating_layout = layout.Floating(border_focus='#85DEC0',border_width=2,
+floating_layout = layout.Floating(
         float_rules=[
-    # Run the utility of `xprop` to see the wm class and name of an X client.
     *layout.Floating.default_float_rules,
     Match(wm_class='confirmreset'),  # gitk
     Match(wm_class='makebranch'),  # gitk
@@ -302,25 +422,19 @@ floating_layout = layout.Floating(border_focus='#85DEC0',border_width=2,
     Match(wm_class='ssh-askpass'),  # ssh-askpass
     Match(title='branchdialog'),  # gitk
     Match(title='pinentry'),  # GPG key password entry
-])
+    Match(wm_class='confirm'),  # gitk
+    Match(wm_class='dialog'),  # gitk
+    Match(wm_class='download'),  # gitk
+    Match(wm_class='error'),  # ssh-askpass
+    Match(title='file_progress'),  # gitk
+    Match(title='notification'),  # GPG key password entry
+    Match(wm_class='splash'),  # ssh-askpass
+    Match(wm_class='toolbar'),  # ssh-askpass
+    ],
+    border_focus=colors["fg3"][0],
+    border_width=0
+)
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 
-#Mantener el nombre del windows manager en LG3D para evitar problemas con algunas
-#apps que se ejecutan con java.
-
 wmname = "LG3D"
-
-# Por si desactivo el widget de los wallpapers > feh --bg-fill Pictures/Wallpapers/wal3.png
-#inicio = [
-#        "picom --experimental-backends & ",
-#]
-#for x in inicio:
-#    os.system(x)
-#for handling android studio hiding itself
-#hook.subscribe.client_name_updated
-def fixAndroidStudio(w):
-    if wm_class == 'sun-awt-X11-XWindowPeer' or 'sun-awt-X11-XFramePeer':
-        for i in range(5):
-            time.sleep(5)
-            w.unhide()
