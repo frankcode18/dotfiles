@@ -83,7 +83,7 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
     # ------------ Apps Configs ------------
 
     ([mod], "w", lazy.window.kill()),
-    ([mod], "q", lazy.spawn("rofi -show drun")),
+    ([mod], "q", lazy.spawn("rofi-apps")),
     ([mod], "o", lazy.spawn("ms-office-online")),
     ([mod], "t", lazy.spawn("teams")),
     ([mod], "e", lazy.spawn("goneovim")),
@@ -183,6 +183,7 @@ def separator(pd=3):
 group_box = {
     'foreground': colors['fg3'],
     'background': colors['fg3'],
+    'disable_drag' : True,
     'font': 'Ubuntu Bold',
     'fontsize': 10,
     'margin_y': 3,
@@ -190,22 +191,19 @@ group_box = {
     'padding_y': 4,
     'padding_x': 5,
     'borderwidth': 1,
-    'block_highlight_text_color': colors['bg1'],
     'active': colors['bg0'],
-    'inactive': colors['bg2'],
+    'inactive': colors['bg3'],
     'rounded': True,
     'highlight_method': 'block',
-    'this_current_screen_border':colorgb ,
-    'this_screen_border': colors['bg'],
-    'other_current_screen_border': colors['orange'],
-    'other_screen_border': colors['bg']
+    'this_current_screen_border':colors['orange'] ,
+    'this_screen_border': colors['blue'],
 }
 
 window_name = {
     **base(fg='fg'),
-    'font': 'Ubuntu Bold',
-    'fontsize': 11,
-    'padding': 5
+    'font': 'Cascadia Code iCursive Cg Regular Italic',
+    'fontsize': 15,
+    'padding': 2
 }
 
 systray = {
@@ -225,16 +223,19 @@ current_layout_icon = {
 }
 
 current_layout = {
-    'padding': 5
+    'padding': 5,
+    'font': 'Fira Mono Medium',
 }
 
 clock = {
-    'format': '%H:%M '
+    'padding': 0, 
+    'font': 'Fira Mono Medium',
+    'format': '%b %d - %I:%M '
 }
 
 volume_icon = {
      'emoji':True,
-     'font': 'Fira Nerd Font',
+     'font': 'Fira Mono Medium',
      'fontsize': 13,
      'padding': 3
 } 
@@ -245,16 +246,17 @@ pomodoro = {
     'color_break' : colors['bg'],
     'padding': 5,
     'fontsize': 13,
-    'font': 'Ubuntu',
-    'prefix_inactive':'work',
-    'prefix_break':'',
-    'prefix_pause':'',
-    'prefix_active':'',
+    'font': 'Fira Mono Medium',
+    'prefix_inactive':'Work',
+    'length_pomodori': 60,
+    'length_short_break': 10,
+    'length_long_break': 30,
 }
 
 def workspaces():
     return [
-        widget.Sep(**separator()),
+        widget.Sep(**separator(),
+        **base(bg='bg')),
         widget.GroupBox(**group_box),
         widget.Image(
             filename=img['gb-dark']
@@ -262,7 +264,7 @@ def workspaces():
         widget.Image(
             filename=img['testgb']
         ),
-        widget.WindowName(**window_name,format='{class}@mrmango1')
+        widget.WindowName(**window_name,format='{class} @mrmango1')
     ]
 
 
@@ -309,6 +311,8 @@ def powerline_base():
         widget.Image(
             filename=img['yellowi']
         ),
+        widget.Sep(**separator(pd=6),
+            **base(bg='fg3')),
         widget.Clock(
             **base(bg='fg3'),
             **clock,
@@ -328,28 +332,29 @@ def powerline_base():
         widget.Volume(
             **base(bg='fg3'),
             padding=5,
-        )
+            font= 'Fira Mono Medium',
+        ),
+        widget.Sep(**separator(pd=3),
+            **base(bg='fg3')),
     ]
 
 
 laptop_widgets = [
     *workspaces(),
-
-    widget.Sep(
-        **separator()
-    ),
+    widget.Sep(**separator(pd=5),
+        **base(bg='bg')),
     widget.Systray(
         **systray
     ),
-    widget.Sep(
-        **separator()
-    ),
+    widget.Sep(**separator(pd=5),
+        **base(bg='bg')),
     widget.Image(
         filename=img['redff']
     ),
     *powerline_base(),
     widget.Sep(
-        **separator()
+        **separator(pd=4),
+        **base(bg='bg')
     ),
  ]
 
