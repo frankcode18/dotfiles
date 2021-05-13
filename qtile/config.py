@@ -11,7 +11,7 @@ qtile_path = path.join(path.expanduser("~"), ".config", "qtile")
 
 # THEME
 
-theme = "material-darker" # only if available in ~/.config/qtile/themes
+theme = "gruvbox" # only if available in ~/.config/qtile/themes
 
 theme_path = path.join(qtile_path, "themes", theme)
 
@@ -174,11 +174,11 @@ def base(fg='bg0', bg='bg'):
     }
 
 
-separator = {
-    **base(),
-    'linewidth': 0,
-    'padding': 3,
-}
+def separator(pd=3):
+    return {
+        'linewidth': 0,
+        'padding': pd
+    }
 
 group_box = {
     'foreground': colors['fg3'],
@@ -234,7 +234,8 @@ clock = {
 
 volume_icon = {
      'emoji':True,
-     'fontsize': 15,
+     'font': 'Fira Nerd Font',
+     'fontsize': 13,
      'padding': 3
 } 
 pomodoro = {
@@ -245,7 +246,7 @@ pomodoro = {
     'padding': 5,
     'fontsize': 13,
     'font': 'Ubuntu',
-    'prefix_inactive':'Work',
+    'prefix_inactive':'work',
     'prefix_break':'',
     'prefix_pause':'',
     'prefix_active':'',
@@ -253,7 +254,7 @@ pomodoro = {
 
 def workspaces():
     return [
-        widget.Sep(**separator),
+        widget.Sep(**separator()),
         widget.GroupBox(**group_box),
         widget.Image(
             filename=img['gb-dark']
@@ -261,7 +262,6 @@ def workspaces():
         widget.Image(
             filename=img['testgb']
         ),
-        widget.Sep(**separator),
         widget.WindowName(**window_name,format='{class}@mrmango1')
     ]
 
@@ -272,60 +272,58 @@ def powerline_base():
             **current_layout_icon,
         ),
         widget.Image(
-            filename=img['middle-red']
+            filename=img['redi']
         ),
         widget.CurrentLayout(
             **base(bg='fg3'),
             **current_layout
         ),
         widget.Image(
-            filename=img['s-green']
-        ),
-        widget.Image(
-            filename=img['bg-green']
+            filename=img['greenf']
         ),
         widget.TextBox(
             **base(bg='green'),
-            **text_box,
+            fontsize=19,
+            padding=5,
             text=''
         ),
+        widget.Sep(**separator(pd=6),
+            **base(bg='green')),
         widget.Image(
-            filename=img['middle-green']
+            filename=img['greeni']
         ),
         widget.Pomodoro(
             **pomodoro
         ),
         widget.Image(
-            filename=img['s-yellow']
-        ),
-        widget.Image(
-            filename=img['bg-yellow']
+            filename=img['yellowf']
         ),
         widget.TextBox(
             **base(bg='yellow'),
-            fontsize=21,
-            padding=7,
+            fontsize=20,
+            padding=5,
             text='',
         ),
+        widget.Sep(**separator(),
+            **base(bg='yellow')),
         widget.Image(
-            filename=img['fg-yellow']
+            filename=img['yellowi']
         ),
         widget.Clock(
             **base(bg='fg3'),
             **clock,
         ),
         widget.Image(
-            filename=img['test1']
-        ),
-        widget.Image(
-            filename=img['bg-blue']
+            filename=img['bluef']
         ),
         widget.Volume(
             **base(bg='blue'),
             **volume_icon
         ),
+        widget.Sep(**separator(pd=4),
+            **base(bg='blue')),
         widget.Image(
-            filename=img['fg-blue']
+            filename=img['bluei']
         ),
         widget.Volume(
             **base(bg='fg3'),
@@ -338,23 +336,20 @@ laptop_widgets = [
     *workspaces(),
 
     widget.Sep(
-        **separator
+        **separator()
     ),
     widget.Systray(
         **systray
     ),
     widget.Sep(
-        **separator
+        **separator()
     ),
     widget.Image(
-        filename=img['bg-red']
-    ),
-    widget.Image(
-        filename=img['fg-red']
+        filename=img['redff']
     ),
     *powerline_base(),
     widget.Sep(
-        **separator
+        **separator()
     ),
  ]
 
@@ -362,7 +357,7 @@ laptop_widgets = [
 monitor_widgets = [
     *workspaces(),
     widget.Image(
-        filename=img['bg-to-secondary']
+        filename=img['bluef']
     ),
     *powerline_base()
 ]
