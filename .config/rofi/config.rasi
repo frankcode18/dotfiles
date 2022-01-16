@@ -1,11 +1,84 @@
-configuration {
-	modi: "window,run,drun";
-	font: "Fira Mono Medium 10";
-	show-icons: true;
-	drun-display-format: "{icon} {name}";
-	theme: "/home/mrmango/.config/rofi/themes/gruvbox";
-	display-window: " ";
-	display-run: " ";
-	display-drun: " ";
+@import "themes/shared/colorschemes/gruvbox.rasi"
+/**
+ * This theme is intended for a 8x2 items list menu with a headerbar.
+ */
+* {
+  background-color: transparent;
+  text-color: @foreground-list;
+  font: "Mochiy Pop One 9";
 }
-@import "/usr/share/rofi/themes/gruvbox-dark-hard.rasi"
+configuration {
+  show-icons:      true;
+  icon-theme:      "Papirus";
+  cycle:           true;
+  disable-history: false;
+  monitor:         "-4";
+  modi:            "drun";
+  display-drun:    "五六七八九";
+}
+
+/* Fixes for rofi 1.7.0 */
+window {
+  border: 0px;
+  width: 25%;
+  height: 295px;
+  padding:                  4px 4px;
+  location:                 center;
+  x-offset:                       0px;
+  y-offset:                       0px;
+}
+inputbar {
+  spacing: -4px;
+}
+listview {
+  columns: 1;
+  scrollbar: false;
+  border: 0px;
+}
+element-text,
+element-icon {
+  background-color: transparent;
+}
+inputbar,
+prompt,
+textbox-prompt-colon,
+entry {
+  background-color: @transparent;
+}
+#inputbar {
+  children: [ prompt, textbox-prompt-colon, entry ];
+  margin: 2px 2px;
+}
+#prompt {
+  padding: 8px 8px;
+  background-color: @accent;
+  text-color: @background;
+}
+#textbox-prompt-colon {
+  expand: false;
+  str: "  三 ";
+  padding: 6px;
+}
+#entry {
+  text-color: @accent;
+  padding: 8px 8px 1px 1px;
+}
+listview {
+  columns: 1;
+}
+#element {
+  padding: 7px;
+  margin: 3px 3px;
+  border: 0px 0px 0px 4;
+}
+element.normal.normal,
+element.alternate.normal {
+    background-color:               transparent;
+  border-color: @background-light;
+}
+element.selected.normal {
+  background-color: @background-focus;
+  text-color: @accent;
+  border-color: @accent;
+}
+

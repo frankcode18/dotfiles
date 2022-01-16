@@ -1,0 +1,93 @@
+/*
+ *
+ * Author  : Aditya Shakya
+ * Mail    : adi1090x@gmail.com
+ * Github  : @adi1090x
+ * Twitter : @adi1090x
+ *
+ */
+
+configuration {
+	font:                      		"Comfortaa 12";
+    disable-history:                false;
+    fullscreen:                     false;
+	hide-scrollbar: 				true;
+	sidebar-mode: 					false;
+}
+
+@import "../../../styles/colors.rasi"
+
+* {
+    background-color:               @background;
+    text-color:                     @foreground;
+}
+
+window {
+    transparency:                   "true";
+    border-radius:                  2px;
+    location:                       northeast;
+	width:							50;
+  height:							290px;
+    x-offset:                       -4px;
+    y-offset:                       28px;
+    padding:                        4px 8px 5px 12px;
+}
+
+
+mainbox {
+    background-color:               @background;
+    children:                       [ listview ];
+    spacing:                        1px;
+    padding:                        0px 2px 0px 2px;
+}
+
+element {
+    background-color:               @background;
+    text-color:                     @foreground;
+    orientation:                    vertical;
+}
+
+element-text {
+	font:							"feather 20";
+    expand:                         true;
+    background-color:               @background;
+    horizontal-align:               0.5;
+    vertical-align:                 0.5;
+    margin:                         1px 0% 1px 0%;
+}
+
+element-text selected {
+    background-color:               @background;
+    text-color:                     @accent;
+}
+
+element normal.urgent,
+element alternate.urgent {
+    background-color:               @off;
+    text-color:                     @accent;
+    border-radius:                  0px;
+}
+
+element normal.active,
+element alternate.active {
+    background-color:               @on;
+    text-color:                     @accent;
+}
+
+element selected {
+    background-color:               @background;
+    text-color:                     @accent;
+    border:                  		0px;
+    border-radius:                  0px;
+    border-color:                  	@border;
+}
+
+element selected.urgent {
+    background-color:               @on;
+    text-color:                     @background;
+}
+
+element selected.active {
+    background-color:               @off;
+    color:                          @background;
+}

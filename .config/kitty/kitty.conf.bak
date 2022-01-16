@@ -1,0 +1,31 @@
+# include ~/.cache/wal/colors-kitty.conf
+include ~/.config/kitty/themes/srcery.conf
+# vim:fileencoding=utf-8:ft=conf
+
+# font_family      Input Mono
+font_family      Fira Code Medium 
+italic_font      auto
+bold_font        auto
+bold_italic_font auto
+# font_family      SFMono Nerd Font Heavy
+# italic_font      Liga SFMono Nerd Font Medium Italic
+# bold_font        Liga SFMono Nerd Font Heavy
+# bold_italic_font Liga SFMono Nerd Font Heavy Italic
+# Font size (in pts)
+font_size        10
+force_ltr no
+
+adjust_line_height  0
+adjust_column_width 0
+window_margin_width 3 1 0 3
+
+disable_ligatures never
+font_features FiraCode-Medium +ss07 +ss10 +cv01 +cv28 +cv27 +cv32 +cv26 +cv25 +ss09 +cv02 +cv06 +ss01 +cv14 +onum +ss05 +ss04 +ss03 +cv31 +cv29
+# font_features FiraCode +ss07 +ss10 +cv01
+
+box_drawing_scale 0.001, 1, 1.5, 2
+allow_remote_control yes
+single-instance 1
+background_opacity 0.60
+dynamic_background_opacity no
+dim_opacity 0.75
