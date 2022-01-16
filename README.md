@@ -18,3 +18,6 @@
 - **[dunst](.config/dunst/dunstrc)** notification manager
 - **[paru](.config/paru/paru.conf)** AUR helper
 - **[fish](.config/fish-shell/fish-shell)** Interactive shell
+- **[starship](.config/starship/starship)** shell prompt
+
+and some more apps that I don't remember
