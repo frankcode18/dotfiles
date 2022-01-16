@@ -1,7 +1,6 @@
 -- Additional Plugins
 
 lvim.plugins = {
-  { "mfussenegger/nvim-jdtls" },
   {"folke/tokyonight.nvim"},
   {"eddyekofo94/gruvbox-flat.nvim"},
   {'google/vim-maktaba'},
@@ -59,8 +58,11 @@ lvim.plugins = {
   {
     'srcery-colors/srcery-vim'
   },
+  {
+    'Rigellute/shades-of-purple.vim'
+  },
 }
 -- Additional Config
 
--- vim.g.gruvbox_flat_style = "hard"
-vim.g.rose_pine_variant='moon'
+vim.g.gruvbox_flat_style = "dark"
+vim.g.gruvbox_flat_style = "hard"

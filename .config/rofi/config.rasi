@@ -1,4 +1,4 @@
-@import "themes/shared/colorschemes/gruvbox.rasi"
+@import "themes/shared/colorschemes/rosePine.rasi"
 /**
  * This theme is intended for a 8x2 items list menu with a headerbar.
  */

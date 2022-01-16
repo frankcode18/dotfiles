@@ -8,7 +8,7 @@
  */
 
 configuration {
-	font:                      		"Comfortaa 12";
+	font:                      		"FiraCode Nerd Font 12";
     disable-history:                false;
     fullscreen:                     false;
 	hide-scrollbar: 				true;
@@ -27,7 +27,7 @@ window {
     border-radius:                  2px;
     location:                       northeast;
 	width:							50;
-  height:							290px;
+  height:							250px;
     x-offset:                       -4px;
     y-offset:                       28px;
     padding:                        4px 8px 5px 12px;
@@ -48,7 +48,7 @@ element {
 }
 
 element-text {
-	font:							"feather 20";
+	font:							"Ubuntu Nerd Font 15";
     expand:                         true;
     background-color:               @background;
     horizontal-align:               0.5;

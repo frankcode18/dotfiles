@@ -1,27 +1,33 @@
+  --[[
+lvim is the global options object
+
+Linters should be
+filled in as strings with either
+a global executable or a path to
+an executable
+]]
+--for fish user
+vim.opt.shell = "/bin/bash"
+
 -- general
 require "user.plugins"
 require "user.keys"
 require "user.lsp"
 require "user.bufferline"
-require "user.settings"
 
+lvim.builtin.dap.active =true
 lvim.log.level = "warn"
 lvim.format_on_save = false
+-- lvim.colorscheme = "shades_of_purple"
 lvim.colorscheme = "rose-pine"
 
 -- LSP
 lvim.lsp.diagnostics.virtual_text = false
--- vim.g.nvim_tree_indent_markers = 1 --"0 by default, this option shows indent markers when folders are open
-vim.list_extend(lvim.lsp.override, { "java", "jdtls" })
 
--- vim.cmd [[autocmd CursorHoldI * silent! lua vim.lsp.buf.signature_help()]]
--- Builtins
+-- TODO: User Config for predefined plugins
+-- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
 lvim.builtin.dashboard.active = true
 lvim.builtin.terminal.active = true
-lvim.builtin.dap.active =true
-lvim.builtin.bufferline.active = true
-lvim.builtin.cmp.experimental.ghost_text = false
-lvim.builtin.telescope.defaults.path_display = { "smart" }
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.show_icons.git = 0
 
@@ -47,7 +53,3 @@ lvim.builtin.treesitter.highlight.enabled = true
 -- lvim.autocommands.custom_groups = {
 --   { "BufWinEnter", "*.lua", "setlocal ts=8 sw=8" },
 -- }
-
---for fish user
-vim.opt.shell = "/bin/bash"
-
