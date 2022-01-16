@@ -1,6 +1,6 @@
 # My personal dotfiles
 ## Arch Linux - Qtile
-![](https://imgur.com/ldeucSa.png)
+
 ![](https://imgur.com/hFeMeNA.png)
 ![](https://imgur.com/qQEFlz0.png)
 ![](https://imgur.com/NttLjYb.png)
