@@ -344,7 +344,7 @@ def workspaces():
                    ),
         widget.CPU(
             font=fontWidget,
-            format = 'CPU {load_percent}%',
+            format='CPU {load_percent}%',
             update_interval=1,
             fontsize=12,
             foreground=leftBackground,
